@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="A simple AI toolkit for writing, translation, captions and summaries.">
+<title>Naseem AI Hub</title>
+<style>
+:root{--bg:#0b1020;--panel:#141d33;--muted:#aab6cf;--text:#f5f7ff;--accent:#9b8cff;--line:#293653}*{box-sizing:border-box}body{margin:0;background:linear-gradient(150deg,#0b1020,#151638 60%,#10283a);color:var(--text);font:16px system-ui,Arial,sans-serif;min-height:100vh}.wrap{max-width:980px;margin:auto;padding:24px 16px 50px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.logo{font-weight:800;font-size:22px}.tag{color:var(--muted);font-size:13px}.hero{padding:36px 0 22px}.hero h1{font-size:clamp(30px,7vw,48px);line-height:1.05;margin:0 0 12px}.hero p{color:var(--muted);max-width:650px;line-height:1.6}.chips{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.chip,button,select{border:1px solid var(--line);border-radius:12px;padding:11px 14px;background:var(--panel);color:var(--text)}.chip{font-size:13px;color:#d9d5ff}.layout{display:grid;grid-template-columns:1fr;gap:16px}.panel{background:#111a2eeF;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 12px 35px #0003}.panel h2{margin:0 0 14px;font-size:20px}label{display:block;margin:12px 0 7px;color:#d8e0f3;font-size:14px}select,textarea{width:100%;font:inherit}textarea{min-height:160px;resize:vertical;background:#0b1325;border:1px solid var(--line);border-radius:12px;color:var(--text);padding:14px;line-height:1.5}button{background:linear-gradient(100deg,#7165e8,#347fbb);border:0;font-weight:700;cursor:pointer;margin-top:12px;width:100%}button:disabled{opacity:.6;cursor:wait}.result{white-space:pre-wrap;background:#0b1325;border:1px solid var(--line);border-radius:12px;padding:14px;min-height:100px;margin-top:14px;line-height:1.6}.small{font-size:12px;color:var(--muted);line-height:1.5}.footer{margin-top:22px;color:var(--muted);font-size:12px;text-align:center}.links{display:flex;gap:10px;flex-wrap:wrap}.links a{color:#c9c1ff}.notice{color:#ffdf9b}
+</style></head>
+<body><main class="wrap">
+<header class="top"><div class="logo">✦ Naseem AI Hub</div><div class="tag">Simple AI tools • Mobile friendly</div></header>
+<section class="hero"><h1>Make everyday work<br>easier with AI.</h1><p>Write captions, create scripts, translate text and summarize notes in one simple place. Choose a tool, enter your text and generate a result.</p><div class="chips"><span class="chip">AI Writer</span><span class="chip">Translator</span><span class="chip">Social Captions</span><span class="chip">Script Writer</span><span class="chip">Summarizer</span></div></section>
+<section class="panel"><h2>Try an AI tool</h2>
+<label for="tool">Choose a tool</label><select id="tool"><option value="writer">AI Writer</option><option value="translate">Translator</option><option value="caption">Social Media Caption</option><option value="script">Video Script Writer</option><option value="summary">Text Summarizer</option></select>
+<label for="lang">Output language</label><select id="lang"><option>English</option><option>Urdu</option><option>Arabic</option><option>Roman Urdu</option></select>
+<label for="prompt">Your instructions or text</label><textarea id="prompt" placeholder="Example: Write a short Instagram caption about a beautiful sunset..."></textarea>
+<button id="go">Generate with AI</button><p class="small notice">Demo setup: this website needs your own secure backend URL before AI generation works. Never paste an API key into this page.</p>
+<div id="result" class="result" aria-live="polite">Your AI result will appear here.</div>
+<button id="copy" type="button" style="background:#273653">Copy result</button>
+</section>
+<section class="panel" style="margin-top:16px"><h2>More tools coming soon</h2><p class="small">AI Image Generator • AI Voice • AI Video • Resume Builder. These need separate services or model access and may have free-use limits.</p></section>
+<footer class="footer">© <span id="year"></span> Naseem AI Hub • Built for learning and useful everyday tasks.</footer>
+</main>
+<script>
+// After deploying your Cloudflare Worker, paste its public URL below.
+const API_URL = "PASTE_YOUR_CLOUDFLARE_WORKER_URL_HERE";
+const $ = id => document.getElementById(id);
+$('year').textContent = new Date().getFullYear();
+$('go').addEventListener('click', async()=>{
+ const prompt=$('prompt').value.trim(); if(!prompt){$('result').textContent='Please enter some text or instructions first.';return;}
+ if(API_URL.includes('PASTE_YOUR')){$('result').textContent='Setup is not finished yet. Deploy the Worker and add its URL in index.html.';return;}
+ $('go').disabled=true;$('go').textContent='Generating…';$('result').textContent='Please wait…';
+ try{const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tool:$('tool').value,language:$('lang').value,prompt})});const data=await r.json();if(!r.ok)throw new Error(data.error||'Request failed');$('result').textContent=data.text||'No result returned.';}
+ catch(e){$('result').textContent='Could not generate: '+e.message+'\nCheck your Worker URL, API key and internet connection.';}
+ finally{$('go').disabled=false;$('go').textContent='Generate with AI';}
+});
+$('copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('result').textContent);$('copy').textContent='Copied!';setTimeout(()=>$('copy').textContent='Copy result',1600);}catch(e){$('copy').textContent='Select and copy the text';}});
+</script></body></html>
